@@ -7,6 +7,9 @@ on:
     pull_request_target:
         types: [opened, synchronize]
         branches: [main]
+concurrency:
+    group: claude-review-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
 jobs:
     review:
         runs-on: ubuntu-latest
