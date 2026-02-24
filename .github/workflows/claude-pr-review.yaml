@@ -84,11 +84,13 @@ jobs:
                       After ALL subagents complete:
                       1. Collect all issues. Merge duplicates (same file, lines within 3 of each other, same problem).
                       2. Drop low-confidence findings.
-                      3. Check existing inline review comments (fetched in Phase 1). Do NOT post an inline comment if
+                      3. For CLAUDE.md violations that appear in 3+ existing places in the codebase, do NOT post inline comments.
+                         Instead, add them to the 'CLAUDE.md improvements' section of the tracking comment
+                      4. Check existing inline review comments (fetched in Phase 1). Do NOT post an inline comment if
                          one already exists on the same file+line about the same problem.
-                      4. Check for author replies that dismiss or reject a previous comment. Do NOT re-raise an issue
+                      5. Check for author replies that dismiss or reject a previous comment. Do NOT re-raise an issue
                          the PR author has already responded to disagreeing with.
-                      5. Post new inline comments with `mcp__github_inline_comment__create_inline_comment`.
+                      6. Post new inline comments with `mcp__github_inline_comment__create_inline_comment`.
 
                       Prefix ALL comments with "Claude: ".
                       Link format: https://github.com/${{ github.repository }}/blob/${{ github.event.pull_request.head.sha }}/README.md#L10-L15
