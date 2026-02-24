@@ -42,7 +42,7 @@ jobs:
                       Use `gh pr diff ${{ github.event.pull_request.number }} --patch` to access the PR content.
                       Use `gh api --paginate repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments` to list top-level comments.
                       Use `gh api --paginate repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments` to list inline review comments.
-                      Use `gh api --paginate repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews | jq '.[] | select(.state == "CHANGES_REQUESTED")'` to list top-level review comments.
+                      Use `gh api --paginate repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews | jq '.[] | select(.body != "" and .body != null)'` to list top-level review comments.
                       You are in repository without that patch applied. Do not apply it.
                       Assume the patch will be build and tested by other GitHub Actions workflows.
 
