@@ -13,6 +13,8 @@ jobs:
         permissions:
             id-token: write # authentication for Claude GH bot
             pull-requests: write # make comments on PR
+            # Note: `pull-requests: write` gives us write access to `issues/comments` API as well,
+            # as long as the comment is under PR.
             contents: read # clone repo
             actions: read # see GH Actions outputs
             issues: read # read issues (for context)
@@ -119,7 +121,7 @@ jobs:
                       --max-turns 100
                       --model claude-opus-4-6
                       --allowedTools "
-                        Read,Write,Edit,MultiEdit,LS,Grep,Glob,
+                        Read,Write,Edit,MultiEdit,LS,Grep,Glob,Task,
                         Bash(cat:*),Bash(test:*),Bash(printf:*),Bash(jq:*),Bash(head:*),Bash(git:*),Bash(gh:*),
                         mcp__github_inline_comment__create_inline_comment,
                         "
