@@ -47,7 +47,7 @@ jobs:
                       - `gh pr view ${{ github.event.pull_request.number }} --json title,body`
                       - `gh api --paginate repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments`
                       - `gh api --paginate repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments`
-                      - `gh api --paginate repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews | jq '.[] | select(.body != "" and .body != null)'`
+                      - `gh api --paginate repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews`
 
                       ## Phase 2: Parallel review subagents
 
@@ -66,7 +66,7 @@ jobs:
                       - Code quality, style, and best practices
                       - Potential bugs, issues, incorrect logic
                       - Security implications
-                      - CLAUDE.md compliance
+                      - CLAUDE.md - compliance
 
                       ## Phase 3: Collect and post
 
@@ -102,8 +102,8 @@ jobs:
                       ### Nits
                       - [ ] **title** — `file:line` — short explanation
 
-                      ### CLAUDE.md recommendations
-                      - suggestion text
+                      ### CLAUDE.md improvements
+                      - improvement suggestion
                       ```
                       Omit empty sections.
 
