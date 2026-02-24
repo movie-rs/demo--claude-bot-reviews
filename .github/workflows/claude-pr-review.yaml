@@ -38,8 +38,9 @@ jobs:
                       PR NUMBER: ${{ github.event.pull_request.number }}
                       HEAD SHA: ${{ github.event.pull_request.head.sha }}
 
-                      Review this pull request. Use /review-pr instructions and doc/developers/style.rst for guidance.
-                      Build and tests are handled by other CI workflows — skip those parts.
+                      Review this pull request.
+                      Read `.claude/commands/review-pr.md` and `doc/developers/style.rst` for review guidelines.
+                      Build, test, coverage, and cleanup sections do not apply — other CI workflows handle those.
                       You are in the upstream repo without the patch applied. Do not apply it.
 
                       ## Phase 1: Gather context
