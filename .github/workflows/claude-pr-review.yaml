@@ -30,10 +30,9 @@ jobs:
             - uses: anthropics/claude-code-action@v1
               if: github.event.pull_request.draft == false
               env:
-                  # OpenRouter
-                  ANTHROPIC_BASE_URL: "${{ secrets.ANTHROPIC_BASE_URL }}"
+                  ANTHROPIC_BASE_URL: https://openrouter.ai/api
               with:
-                  # Anthropic auth
+                  # Anthropic/OpenRouter auth
                   anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
                   # claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
                   github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -60,8 +59,17 @@ jobs:
 
                       ## Phase 2: Parallel review subagents
 
-                      Launch ALL 4 subagents simultaneously using the Task tool. Give each one the PR title, description,
-                      full patch, and the list of changed files. Tell each to read the full pre-patch file for context.
+                      Review:
+                      - Code quality, style, and best practices
+                      - Potential bugs, issues, incorrect logic
+                      - Security implications
+                      - CLAUDE.md - compliance
+
+                      For every category, launch subagents to review them in parallel. Group related sections
+                      as needed — use 2-4 subagents based on PR size and scope.
+
+                      Give each subagent the PR title, description, full patch, and the list of changed files.
+
                       Each subagent must return a JSON array of issues:
                       `[{"file": "path", "line": <number or null>, "severity": "must-fix|suggestion|nit", "title": "...", "body": "..."}]`
 
@@ -70,12 +78,6 @@ jobs:
                         the pattern actually exists before flagging a violation.
                       - For "use X instead of Y" suggestions, confirm X actually exists and works for this case.
                       - If unsure, don't include the issue.
-
-                      Agents:
-                      - Code quality, style, and best practices
-                      - Potential bugs, issues, incorrect logic
-                      - Security implications
-                      - CLAUDE.md - compliance
 
                       ## Phase 3: Collect and post
 
