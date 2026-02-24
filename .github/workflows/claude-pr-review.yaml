@@ -40,8 +40,8 @@ jobs:
                       You can use multiple subagents to parallelize tasks. Each subagent should be told the PR title and description.
 
                       Use `gh pr diff ${{ github.event.pull_request.number }} --patch` to access the PR content.
-                      Use `gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments` to list top-level comments.
-                      Use `gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments` to list inline review comments.
+                      Use `gh api --paginate repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments` to list top-level comments.
+                      Use `gh api --paginate repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments` to list inline review comments.
                       You are in repository without that patch applied. Do not apply it.
                       Assume the patch will be build and tested by other GitHub Actions workflows.
 
