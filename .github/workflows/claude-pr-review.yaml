@@ -125,8 +125,8 @@ jobs:
                          If the author dismissed it, mark it `- [x] ~~title~~ (dismissed)`.
                       2. Append any NEW issues found in this run that aren't already listed.
                       3. Update the HEAD SHA in the header line.
-                      4. Edit the comment in-place:
-                         `gh api --method PATCH repos/${{ github.repository }}/issues/comments/<comment-id> -f body="..."`
+                      4. Edit the comment in-place. Use jq + stdin to avoid shell-quoting issues with markdown:
+                         `jq -n --arg body "$BODY" '{"body":$body}' | gh api --method PATCH repos/${{ github.repository }}/issues/comments/<comment-id> --input -`
                   claude_args: |
                       --max-turns 100
                       --model claude-opus-4-6
