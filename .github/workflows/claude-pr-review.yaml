@@ -7,6 +7,9 @@ on:
     pull_request_target:
         types: [opened, synchronize]
         branches: [main]
+concurrency:
+    group: claude-review-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
 jobs:
     review:
         runs-on: ubuntu-latest
@@ -26,10 +29,13 @@ jobs:
 
             - uses: anthropics/claude-code-action@v1
               if: github.event.pull_request.draft == false
+              # Anthropic auth
+              env:
+                  ANTHROPIC_BASE_URL: "${{ secrets.ANTHROPIC_BASE_URL }}"
+                  ANTHROPIC_AUTH_TOKEN: "${{ secrets.ANTHROPIC_AUTH_TOKEN }}"
               with:
-                  # Anthropic auth
-                  # anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-                  claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+                  anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+                  # claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
                   github_token: ${{ secrets.GITHUB_TOKEN }}
 
                   # Prompt
@@ -38,8 +44,9 @@ jobs:
                       PR NUMBER: ${{ github.event.pull_request.number }}
                       HEAD SHA: ${{ github.event.pull_request.head.sha }}
 
-                      Review this pull request. Use /review-pr instructions and doc/developers/style.rst for guidance.
-                      Build and tests are handled by other CI workflows — skip those parts.
+                      Review this pull request.
+                      Read `.claude/commands/review-pr.md` and `doc/developers/style.rst` for review guidelines.
+                      Build, test, coverage, and cleanup sections do not apply — other CI workflows handle those.
                       You are in the upstream repo without the patch applied. Do not apply it.
 
                       ## Phase 1: Gather context
