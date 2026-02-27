@@ -28,12 +28,10 @@ jobs:
               uses: actions/checkout@v6
 
             - uses: anthropics/claude-code-action@v1
-              if: github.event.pull_request.draft == false
               env:
-                  # OpenRouter
-                  ANTHROPIC_BASE_URL: "${{ secrets.ANTHROPIC_BASE_URL }}"
+                  ANTHROPIC_BASE_URL: https://openrouter.ai/api
               with:
-                  # Anthropic auth
+                  # Anthropic/OpenRouter auth
                   anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
                   # claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
                   github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -60,10 +58,23 @@ jobs:
 
                       ## Phase 2: Parallel review subagents
 
-                      Launch ALL 4 subagents simultaneously using the Task tool. Give each one the PR title, description,
-                      full patch, and the list of changed files. Tell each to read the full pre-patch file for context.
+                      Review:
+                      - Code quality, style, and best practices
+                      - Potential bugs, issues, incorrect logic
+                      - Security implications
+                      - CLAUDE.md - compliance
+
+                      For every category, launch subagents to review them in parallel. Group related sections
+                      as needed — use 2-4 subagents based on PR size and scope.
+
+                      Give each subagent the PR title, description, full patch, and the list of changed files.
+
                       Each subagent must return a JSON array of issues:
                       `[{"file": "path", "line": <number or null>, "severity": "must-fix|suggestion|nit", "title": "...", "body": "..."}]`
+
+                      Subagents must ONLY return the JSON array — they must NOT post comments,
+                      call `gh`, or use `mcp__github_inline_comment__create_inline_comment`.
+                      All posting happens in Phase 3.
 
                       Each subagent MUST verify its findings before returning them:
                       - For style/convention claims, check at least 3 existing examples in the codebase to confirm
@@ -71,22 +82,18 @@ jobs:
                       - For "use X instead of Y" suggestions, confirm X actually exists and works for this case.
                       - If unsure, don't include the issue.
 
-                      Agents:
-                      - Code quality, style, and best practices
-                      - Potential bugs, issues, incorrect logic
-                      - Security implications
-                      - CLAUDE.md - compliance
-
                       ## Phase 3: Collect and post
 
                       After ALL subagents complete:
                       1. Collect all issues. Merge duplicates (same file, lines within 3 of each other, same problem).
                       2. Drop low-confidence findings.
-                      3. Check existing inline review comments (fetched in Phase 1). Do NOT post an inline comment if
+                      3. For CLAUDE.md violations that appear in 3+ existing places in the codebase, do NOT post inline comments.
+                         Instead, add them to the 'CLAUDE.md improvements' section of the tracking comment
+                      4. Check existing inline review comments (fetched in Phase 1). Do NOT post an inline comment if
                          one already exists on the same file+line about the same problem.
-                      4. Check for author replies that dismiss or reject a previous comment. Do NOT re-raise an issue
+                      5. Check for author replies that dismiss or reject a previous comment. Do NOT re-raise an issue
                          the PR author has already responded to disagreeing with.
-                      5. Post new inline comments with `mcp__github_inline_comment__create_inline_comment`.
+                      6. Post new inline comments with `mcp__github_inline_comment__create_inline_comment`.
 
                       Prefix ALL comments with "Claude: ".
                       Link format: https://github.com/${{ github.repository }}/blob/${{ github.event.pull_request.head.sha }}/README.md#L10-L15
@@ -122,8 +129,11 @@ jobs:
                          If the author dismissed it, mark it `- [x] ~~title~~ (dismissed)`.
                       2. Append any NEW issues found in this run that aren't already listed.
                       3. Update the HEAD SHA in the header line.
-                      4. Edit the comment in-place:
-                         `gh api --method PATCH repos/${{ github.repository }}/issues/comments/<comment-id> -f body="..."`
+                      4. Edit the comment in-place.
+                         ```
+                         printf '%s' "$BODY" > pr-review-body.txt
+                         gh api --method PATCH repos/${{ github.repository }}/issues/comments/<comment-id> -F body=@pr-review-body.txt
+                         ```
                   claude_args: |
                       --max-turns 100
                       --model claude-opus-4-6
